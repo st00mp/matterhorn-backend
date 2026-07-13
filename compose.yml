@@ -17,11 +17,11 @@ services:
       - "5432:5432"
     environment:
       # These must match application-docker.properties
-      POSTGRES_DB: agentindex
-      POSTGRES_USER: agentindex
-      POSTGRES_PASSWORD: agentindex
+      POSTGRES_DB: matterhorn
+      POSTGRES_USER: matterhorn
+      POSTGRES_PASSWORD: matterhorn
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U agentindex -d agentindex"]
+      test: ["CMD-SHELL", "pg_isready -U matterhorn -d matterhorn"]
       interval: 2s
       timeout: 3s
       retries: 15
