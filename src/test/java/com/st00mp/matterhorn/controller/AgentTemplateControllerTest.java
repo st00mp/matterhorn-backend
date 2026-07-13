@@ -1,0 +1,363 @@
+package com.st00mp.matterhorn.controller;
+
+import com.st00mp.matterhorn.dto.TemplateRequest;
+import com.st00mp.matterhorn.entity.FieldDefinition;
+import com.st00mp.matterhorn.service.AgentTemplateService;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@Transactional
+@SpringBootTest
+@AutoConfigureMockMvc
+class AgentTemplateControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private AgentTemplateService agentTemplateService;
+
+    @Nested
+    public class CreateTemplateTests {
+
+        @Test
+        void createTemplate_nominal_returns201() throws Exception {
+            // Given
+            var request = new TemplateRequest(
+                    "Quote Agent",
+                    "Sales",
+                    "Generates a personalised quote based on the company name and hourly rate.",
+                    "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
+                    List.of(
+                            new FieldDefinition("company_name", "Company name", "text", ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                    "1.0.0"
+            );
+            var body = objectMapper.writeValueAsString(request);
+
+            // When
+            mockMvc.perform(post("/templates")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+
+                    // Then
+                    .andExpect(status().isCreated())
+                    .andExpect(header().exists("Location"))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.name").value("Quote Agent"));
+        }
+
+        @Test
+        void createTemplate_blankName_returns400() throws Exception {
+            // Given
+            var request = new TemplateRequest(
+                    "",
+                    "Sales",
+                    "Generates a personalised quote based on the company name and hourly rate.",
+                    "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
+                    List.of(
+                            new FieldDefinition("company_name", "Company name", "text", ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                    "1.0.0"
+            );
+            var body = objectMapper.writeValueAsString(request);
+
+            // When
+            mockMvc.perform(post("/templates")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    // Then
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.name").exists());
+        }
+
+        @Test
+        void createTemplate_malformedJson_returns400() throws Exception {
+            // Given: syntactically invalid JSON
+            var body = "{\"name\": \"Quote Agent\", ";
+
+            // When
+            mockMvc.perform(post("/templates")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    // Then
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error").exists());
+        }
+
+        @Test
+        void createTemplate_wrongFieldType_returns400() throws Exception {
+            // Given: "fields" sent as a scalar string instead of an array of field objects
+            var body = """
+                    {
+                      "name": "Quote Agent",
+                      "category": "Sales",
+                      "description": "Generates a personalised quote.",
+                      "instructions": "You are a quote assistant.",
+                      "fields": "company_name",
+                      "version": "1.0.0"
+                    }
+                    """;
+
+            // When
+            mockMvc.perform(post("/templates")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    // Then
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error").exists());
+        }
+
+        @Test
+        void createTemplate_emptyFields_returns400() throws Exception {
+            // Given: an empty fields list violates @NotEmpty
+            var request = new TemplateRequest(
+                    "Quote Agent",
+                    "Sales",
+                    "Generates a personalised quote.",
+                    "You are a quote assistant.",
+                    List.of(),
+                    "1.0.0"
+            );
+            var body = objectMapper.writeValueAsString(request);
+
+            // When
+            mockMvc.perform(post("/templates")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    // Then
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.fields").exists());
+        }
+
+        @Test
+        void createTemplate_fieldWithBlankKey_returns400() throws Exception {
+            // Given: a field whose key is blank violates @NotBlank via @Valid cascade
+            var request = new TemplateRequest(
+                    "Quote Agent",
+                    "Sales",
+                    "Generates a personalised quote.",
+                    "You are a quote assistant.",
+                    List.of(new FieldDefinition("   ", "Company name", "text", "")),
+                    "1.0.0"
+            );
+            var body = objectMapper.writeValueAsString(request);
+
+            // When
+            mockMvc.perform(post("/templates")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    // Then
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.['fields[0].key']").exists());
+        }
+
+        @Test
+        void createTemplate_fieldWithMissingLabelAndType_returns400() throws Exception {
+            // Given: a field missing label and type violates @NotBlank via @Valid cascade
+            var body = """
+                    {
+                      "name": "Quote Agent",
+                      "category": "Sales",
+                      "description": "Generates a personalised quote.",
+                      "instructions": "You are a quote assistant.",
+                      "fields": [{"key": "company_name"}],
+                      "version": "1.0.0"
+                    }
+                    """;
+
+            // When
+            mockMvc.perform(post("/templates")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    // Then
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.['fields[0].label']").exists())
+                    .andExpect(jsonPath("$.['fields[0].type']").exists());
+        }
+    }
+
+    @Nested
+    class GetTemplateTests {
+
+        @Test
+        void getTemplate_nominal_returns200() throws Exception {
+            // Given
+            var request = new TemplateRequest(
+                    "Quote Agent",
+                    "Sales",
+                    "Generates a personalised quote based on the company name and hourly rate.",
+                    "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
+                    List.of(
+                            new FieldDefinition("company_name", "Company name", "text", ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                    "1.0.0"
+            );
+            var seeded = agentTemplateService.create(request);
+            var id = seeded.getId();
+
+            // When/ Then
+            mockMvc.perform(get("/templates/{id}", id))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(id))
+                    .andExpect(jsonPath("$.name").value(seeded.getName()));
+        }
+
+        @Test
+        void getTemplate_missingId_returns404() throws Exception {
+            // Given: no template exists with this id
+
+            // When/ Then
+            mockMvc.perform(get("/templates/{id}", 999999L))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error").exists());
+        }
+    }
+
+    @Test
+    void getAllTemplates_returns200AndArray() throws Exception {
+        // When / Then
+        mockMvc.perform(get("/templates"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Nested
+    class UpdateTemplateTests {
+
+        @Test
+        void updateTemplate_nominal_returns200() throws Exception {
+            // Given
+            var seed = new TemplateRequest(
+                    "Quote Agent",
+                    "Sales",
+                    "Generates a personalised quote based on the company name and hourly rate.",
+                    "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
+                    List.of(
+                            new FieldDefinition("company_name", "Company name", "text", ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                    "1.0.0"
+            );
+            var id = agentTemplateService.create(seed).getId();
+
+            var update = new TemplateRequest(
+                    "Quote Agent",
+                    "Sales",
+                    "Generates a personalised quote based on the company name and hourly rate.",
+                    "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
+                    List.of(
+                            new FieldDefinition("company_name", "Company name", "text", ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                    "2.0.0"
+            );
+            var body = objectMapper.writeValueAsString(update);
+
+            // When
+            mockMvc.perform(put("/templates/{id}", id)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    // Then
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(id))
+                    .andExpect(jsonPath("$.version").value(update.version()));
+        }
+
+        @Test
+        void updateTemplate_missingId_returns404() throws Exception {
+            // Given: no template exists with this id
+            var update = new TemplateRequest(
+                    "Quote Agent",
+                    "Sales",
+                    "Generates a personalised quote based on the company name and hourly rate.",
+                    "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
+                    List.of(
+                            new FieldDefinition("company_name", "Company name", "text", ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                    "1.0.0"
+            );
+            var body = objectMapper.writeValueAsString(update);
+
+            // When/ Then
+            mockMvc.perform(put("/templates/{id}", 999999L)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    // Then
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error").exists());
+        }
+
+        @Test
+        void updateTemplate_blankName_returns400() throws Exception {
+            // Given: invalid body (name blank)
+            var invalid = new TemplateRequest(
+                    "",
+                    "Sales",
+                    "Generates a personalised quote based on the company name and hourly rate.",
+                    "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
+                    List.of(
+                            new FieldDefinition("company_name", "Company name", "text", ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                    "1.0.0"
+            );
+            var body = objectMapper.writeValueAsString(invalid);
+
+            // When / Then
+            mockMvc.perform(put("/templates/{id}", 1L)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.name").exists());
+        }
+    }
+
+    @Nested
+    class DeleteTemplateTests {
+
+        @Test
+        void deleteTemplate_nominal_returns204() throws Exception {
+            // Given
+            var seed = new TemplateRequest(
+                    "Quote Agent",
+                    "Sales",
+                    "Generates a personalised quote based on the company name and hourly rate.",
+                    "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
+                    List.of(
+                            new FieldDefinition("company_name", "Company name", "text", ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                    "1.0.0"
+            );
+            var id = agentTemplateService.create(seed).getId();
+
+            // When/ Then
+            mockMvc.perform(delete("/templates/{id}", id))
+                    .andExpect(status().isNoContent());
+            mockMvc.perform(get("/templates/{id}", id))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void deleteTemplate_missingId_returns404() throws Exception {
+            // Given: no template exists with this id
+
+            // When/ Then
+            mockMvc.perform(delete("/templates/{id}", 999999L))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error").exists());
+        }
+    }
+}

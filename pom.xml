@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.st00mp</groupId>
-    <artifactId>agent-index-backend</artifactId>
+    <artifactId>matterhorn-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>agent-index-backend</name>
-    <description>agent-index-backend</description>
+    <name>matterhorn-backend</name>
+    <description>matterhorn-backend</description>
     <url/>
     <licenses>
         <license/>
