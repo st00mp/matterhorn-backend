@@ -55,7 +55,7 @@ class AgentInstanceControllerTest {
                     "Sales",
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}.",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", "")),
+                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
                     "1.0.0"
             );
             var templateId = agentTemplateService.create(templateRequest).getId();
@@ -82,7 +82,7 @@ class AgentInstanceControllerTest {
             var templateRequest = new TemplateRequest(
                     "Quote Agent", "Sales", "desc",
                     "Instructions {{company_name}}",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", "")),
+                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
                     "1.0.0"
             );
             var templateId = agentTemplateService.create(templateRequest).getId();
@@ -104,7 +104,7 @@ class AgentInstanceControllerTest {
             var templateRequest = new TemplateRequest(
                     "Quote Agent", "Sales", "desc",
                     "Instructions {{company_name}}",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", "")),
+                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
                     "1.0.0"
             );
             var templateId = agentTemplateService.create(templateRequest).getId();
@@ -161,7 +161,7 @@ class AgentInstanceControllerTest {
                     "Sales",
                     "desc",
                     "You are the assistant for {{company_name}}.",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", "")),
+                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
                     "1.0.0")).getId();
 
             var instanceId = agentInstanceService.create(templateId,
@@ -188,7 +188,7 @@ class AgentInstanceControllerTest {
             var templateId = agentTemplateService.create(new TemplateRequest(
                     "Quote Agent", "Sales", "desc",
                     "Hi {{company_name}}, signed {{signature}}.",   // 2 placeholders
-                    List.of(new FieldDefinition("company_name", "Company name", "text", "")),                  // fields : signature ABSENT
+                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),                  // fields : signature ABSENT
                     "1.0.0")).getId();
 
             var instanceId = agentInstanceService.create(templateId,
@@ -219,7 +219,7 @@ class AgentInstanceControllerTest {
             var templateId = agentTemplateService.create(new TemplateRequest(
                     "Quote Agent", "Sales", "desc",
                     "Hi {{company_name}}, signed {{signature}}.",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", "")),
+                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
                     "1.0.0")).getId();
 
             var instanceId = agentInstanceService.create(templateId,
@@ -259,7 +259,7 @@ class AgentInstanceControllerTest {
                     "Sales",
                     "desc",
                     "You are the assistant for {{company_name}}.",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", "")),
+                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
                     "1.0.0")).getId();
 
             var instanceId = agentInstanceService.create(templateId,
