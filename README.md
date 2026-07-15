@@ -98,6 +98,15 @@ The API is documented and browsable via Swagger UI once the app is running:
   plain text, substituting each `{{placeholder}}` with its stored value (200 `text/plain`,
   404 if the instance does not exist, 422 if one or more placeholders cannot be resolved)
 
+**Incoming mails (admin)**
+
+- `POST /admin/incoming-mails` — capture an incoming mail attached to an existing
+  instance, stored exactly as received with a server-set `receivedAt` (201 with
+  `Location` header, 400 if `sender` or `body` is missing or blank, 404 if the
+  instance does not exist)
+- `GET /admin/incoming-mails/{id}` — get an incoming mail by ID, exactly as stored
+  (404 if not found)
+
 ## Build & tests
 
 ```bash

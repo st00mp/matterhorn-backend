@@ -61,6 +61,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return jsonError(HttpStatus.NOT_FOUND, Map.of("error", exception.getMessage()));
     }
 
+    @ExceptionHandler(IncomingMailNotFoundException.class)
+    public ResponseEntity<Object> handleIncomingMailNotFound(IncomingMailNotFoundException exception) {
+        return jsonError(HttpStatus.NOT_FOUND, Map.of("error", exception.getMessage()));
+    }
+
     // --- Overrides of Spring's standard handling -----------------------------
 
     @Override
