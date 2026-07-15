@@ -41,11 +41,43 @@ on `http://localhost:8080`.
 
 ## Quickstart
 
-The full chain in three calls: create a template, instantiate it with values,
-then assemble the output. The `values` keys must match the template's field `key`s.
+On startup, the app seeds the **engagement-letter template** (« Agent lettre de
+mission », version `1`) from `src/main/resources/seed/engagement-letter/`. Seeding
+is idempotent: a template is identified by its `(name, version)` pair, so restarts
+never create duplicates. The seeded template gets id `1` on an empty database.
+
+The full chain in three calls: list the seeded template, instantiate it with values,
+then assemble the output. The `values` keys must match the template's field `key`s —
+all of them, including `engine` fields (instance validation covers every field).
 
 ```bash
-# 1. Create a template (returns 201 with a Location header, e.g. /templates/1)
+# 1. The seeded template is already there
+curl http://localhost:8080/templates
+
+# 2. Create a test instance from it (all 8 fields, engine fields included)
+curl -i -X POST http://localhost:8080/templates/1/instances \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "values": {
+          "firm_name": "Fiduciaire Horizon SRL",
+          "firm_company_number": "BE 0123.456.789",
+          "firm_itaa_number": "ITAA 50.123.456",
+          "representative_name": "Marie Lambert, gérante",
+          "base_monthly_fee": "95",
+          "price_per_document": "0.85",
+          "tone_of_voice": "professionnel et chaleureux",
+          "signature": "Marie Lambert — Fiduciaire Horizon"
+        }
+      }'
+
+# 3. Assemble the output (use the instance id from step 2)
+curl http://localhost:8080/instances/1/output
+# The system prompt with every {{placeholder}} resolved — no {{ left.
+```
+
+You can also create your own templates from scratch:
+
+```bash
 curl -i -X POST http://localhost:8080/templates \
   -H 'Content-Type: application/json' \
   -d '{
@@ -59,15 +91,6 @@ curl -i -X POST http://localhost:8080/templates \
         ],
         "version": "1.0.0"
       }'
-
-# 2. Create an instance from that template (use the id from step 1)
-curl -i -X POST http://localhost:8080/templates/1/instances \
-  -H 'Content-Type: application/json' \
-  -d '{"values": {"company_name": "Acme", "hourly_rate": "65"}}'
-
-# 3. Assemble the output (use the instance id from step 2)
-curl http://localhost:8080/instances/1/output
-# You are a quote assistant for Acme. Bill at 65 €/h.
 ```
 
 ## API

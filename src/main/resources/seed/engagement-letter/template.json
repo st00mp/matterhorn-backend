@@ -1,0 +1,64 @@
+{
+  "name": "Agent lettre de mission",
+  "category": "Fiduciaire",
+  "description": "Rédige la lettre de mission d'un cabinet fiduciaire à partir des données d'un dossier client. Les montants ne sont jamais calculés par l'agent : ils lui sont fournis, déjà calculés, par le moteur de chiffrage.",
+  "version": "1",
+  "fields": [
+    {
+      "key": "firm_name",
+      "label": "Dénomination du cabinet",
+      "type": "text",
+      "kind": "prompt",
+      "help": "Nom complet tel qu'il doit apparaître dans la lettre. Ex. : Fiduciaire Horizon SRL"
+    },
+    {
+      "key": "firm_company_number",
+      "label": "Numéro d'entreprise (BCE)",
+      "type": "text",
+      "kind": "prompt",
+      "help": "Ex. : BE 0123.456.789"
+    },
+    {
+      "key": "firm_itaa_number",
+      "label": "Numéro d'agrément ITAA",
+      "type": "text",
+      "kind": "prompt",
+      "help": "Ex. : ITAA 50.123.456"
+    },
+    {
+      "key": "representative_name",
+      "label": "Représentant signataire",
+      "type": "text",
+      "kind": "prompt",
+      "help": "Personne qui signe la lettre au nom du cabinet. Ex. : Marie Lambert, gérante"
+    },
+    {
+      "key": "base_monthly_fee",
+      "label": "Forfait mensuel de base (€)",
+      "type": "number",
+      "kind": "engine",
+      "help": "Montant du forfait mensuel. Lu par le moteur de chiffrage, jamais inséré dans le prompt."
+    },
+    {
+      "key": "price_per_document",
+      "label": "Prix par document (€)",
+      "type": "number",
+      "kind": "engine",
+      "help": "Prix unitaire au-delà du volume inclus. Lu par le moteur de chiffrage, jamais inséré dans le prompt."
+    },
+    {
+      "key": "tone_of_voice",
+      "label": "Ton du cabinet",
+      "type": "text",
+      "kind": "prompt",
+      "help": "Gouverne le style de rédaction, jamais le contenu. Ex. : professionnel et chaleureux"
+    },
+    {
+      "key": "signature",
+      "label": "Bloc de signature",
+      "type": "text",
+      "kind": "prompt",
+      "help": "Texte exact fermant le bloc cabinet. Ex. : Marie Lambert — Fiduciaire Horizon"
+    }
+  ]
+}

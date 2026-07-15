@@ -44,8 +44,8 @@ class AgentTemplateControllerTest {
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
                     List.of(
-                            new FieldDefinition("company_name", "Company name", "text", ""),
-                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                            new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", FieldDefinition.Kind.PROMPT, "e.g. 65")),
                     "1.0.0"
             );
             var body = objectMapper.writeValueAsString(request);
@@ -71,8 +71,8 @@ class AgentTemplateControllerTest {
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
                     List.of(
-                            new FieldDefinition("company_name", "Company name", "text", ""),
-                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                            new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", FieldDefinition.Kind.PROMPT, "e.g. 65")),
                     "1.0.0"
             );
             var body = objectMapper.writeValueAsString(request);
@@ -153,7 +153,7 @@ class AgentTemplateControllerTest {
                     "Sales",
                     "Generates a personalised quote.",
                     "You are a quote assistant.",
-                    List.of(new FieldDefinition("   ", "Company name", "text", "")),
+                    List.of(new FieldDefinition("   ", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
                     "1.0.0"
             );
             var body = objectMapper.writeValueAsString(request);
@@ -204,8 +204,8 @@ class AgentTemplateControllerTest {
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
                     List.of(
-                            new FieldDefinition("company_name", "Company name", "text", ""),
-                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                            new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", FieldDefinition.Kind.PROMPT, "e.g. 65")),
                     "1.0.0"
             );
             var seeded = agentTemplateService.create(request);
@@ -249,8 +249,8 @@ class AgentTemplateControllerTest {
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
                     List.of(
-                            new FieldDefinition("company_name", "Company name", "text", ""),
-                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                            new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", FieldDefinition.Kind.PROMPT, "e.g. 65")),
                     "1.0.0"
             );
             var id = agentTemplateService.create(seed).getId();
@@ -261,8 +261,8 @@ class AgentTemplateControllerTest {
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
                     List.of(
-                            new FieldDefinition("company_name", "Company name", "text", ""),
-                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                            new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", FieldDefinition.Kind.PROMPT, "e.g. 65")),
                     "2.0.0"
             );
             var body = objectMapper.writeValueAsString(update);
@@ -286,8 +286,8 @@ class AgentTemplateControllerTest {
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
                     List.of(
-                            new FieldDefinition("company_name", "Company name", "text", ""),
-                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                            new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", FieldDefinition.Kind.PROMPT, "e.g. 65")),
                     "1.0.0"
             );
             var body = objectMapper.writeValueAsString(update);
@@ -310,8 +310,8 @@ class AgentTemplateControllerTest {
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
                     List.of(
-                            new FieldDefinition("company_name", "Company name", "text", ""),
-                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                            new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", FieldDefinition.Kind.PROMPT, "e.g. 65")),
                     "1.0.0"
             );
             var body = objectMapper.writeValueAsString(invalid);
@@ -337,8 +337,8 @@ class AgentTemplateControllerTest {
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}. Always base your estimates on an hourly rate of {{hourly_rate}} €/h and present them in a clear, professional format.",
                     List.of(
-                            new FieldDefinition("company_name", "Company name", "text", ""),
-                            new FieldDefinition("hourly_rate", "Hourly rate", "number", "e.g. 65")),
+                            new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, ""),
+                            new FieldDefinition("hourly_rate", "Hourly rate", "number", FieldDefinition.Kind.PROMPT, "e.g. 65")),
                     "1.0.0"
             );
             var id = agentTemplateService.create(seed).getId();
