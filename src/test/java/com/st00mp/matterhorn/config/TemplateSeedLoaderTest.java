@@ -1,17 +1,16 @@
 package com.st00mp.matterhorn.config;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.st00mp.matterhorn.entity.AgentTemplate;
 import com.st00mp.matterhorn.repository.AgentTemplateRepository;
+import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
-
-import java.io.IOException;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class TemplateSeedLoaderTest {

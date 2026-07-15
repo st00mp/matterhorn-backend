@@ -25,10 +25,7 @@ public class OpenApiConfig {
                                 REST API to manage agent templates and their instances. \
                                 Templates hold reusable instructions with {{placeholders}}; \
                                 instances bind values to those placeholders and assemble the final output.""")
-                        .license(new License()
-                                .name("Proprietary — All rights reserved"))
-                        .contact(new Contact()
-                                .name("Matterhorn")
-                                .url("https://github.com/st00mp/matterhorn-backend")));
+                        .license(new License().name("Proprietary — All rights reserved"))
+                        .contact(new Contact().name("Matterhorn").url("https://github.com/st00mp/matterhorn-backend")));
     }
 }

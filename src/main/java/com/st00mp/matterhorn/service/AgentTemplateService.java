@@ -4,16 +4,15 @@ import com.st00mp.matterhorn.dto.TemplateRequest;
 import com.st00mp.matterhorn.entity.AgentTemplate;
 import com.st00mp.matterhorn.exception.TemplateNotFoundException;
 import com.st00mp.matterhorn.repository.AgentTemplateRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AgentTemplateService {
 
     private final AgentTemplateRepository agentTemplateRepository;
 
-    public AgentTemplateService (AgentTemplateRepository  agentTemplateRepository) {
+    public AgentTemplateService(AgentTemplateRepository agentTemplateRepository) {
         this.agentTemplateRepository = agentTemplateRepository;
     }
 
@@ -32,8 +31,7 @@ public class AgentTemplateService {
     }
 
     public AgentTemplate getById(Long id) {
-        return agentTemplateRepository.findById(id)
-                .orElseThrow(() -> new TemplateNotFoundException(id));
+        return agentTemplateRepository.findById(id).orElseThrow(() -> new TemplateNotFoundException(id));
     }
 
     public List<AgentTemplate> getAll() {
@@ -58,5 +56,4 @@ public class AgentTemplateService {
         AgentTemplate template = getById(id);
         agentTemplateRepository.delete(template);
     }
-
 }

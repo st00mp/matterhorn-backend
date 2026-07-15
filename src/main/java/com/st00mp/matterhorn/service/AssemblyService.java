@@ -4,13 +4,12 @@ import com.st00mp.matterhorn.entity.AgentInstance;
 import com.st00mp.matterhorn.entity.AgentTemplate;
 import com.st00mp.matterhorn.exception.InstanceNotFoundException;
 import com.st00mp.matterhorn.exception.UnresolvedPlaceholderException;
-import org.springframework.stereotype.Service;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.springframework.stereotype.Service;
 
 /**
  * Assembles instruction strings by resolving {@code {{placeholder}}} tokens against a value map.
@@ -69,7 +68,6 @@ public class AssemblyService {
             throw new UnresolvedPlaceholderException(missing);
         }
 
-        return PLACEHOLDER.matcher(instructions)
-                .replaceAll(match -> values.get(match.group(1)));
+        return PLACEHOLDER.matcher(instructions).replaceAll(match -> values.get(match.group(1)));
     }
 }

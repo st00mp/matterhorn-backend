@@ -8,11 +8,13 @@ public record FieldDefinition(
         @NotBlank String label,
         @NotBlank String type,
         Kind kind,
-        String help
-) {
+        String help) {
     public enum Kind {
-        @JsonProperty("prompt") PROMPT,
-        @JsonProperty("engine") ENGINE,
-        @JsonProperty("both") BOTH
+        @JsonProperty("prompt")
+        PROMPT,
+        @JsonProperty("engine")
+        ENGINE,
+        @JsonProperty("both")
+        BOTH
     }
 }

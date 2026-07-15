@@ -8,10 +8,9 @@ import com.st00mp.matterhorn.exception.IncompleteInstanceException;
 import com.st00mp.matterhorn.exception.InstanceNotFoundException;
 import com.st00mp.matterhorn.exception.TemplateNotFoundException;
 import com.st00mp.matterhorn.repository.AgentInstanceRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AgentInstanceService {
@@ -19,8 +18,8 @@ public class AgentInstanceService {
     private final AgentInstanceRepository agentInstanceRepository;
     private final AgentTemplateService agentTemplateService;
 
-    public AgentInstanceService(AgentInstanceRepository agentInstanceRepository,
-                                AgentTemplateService agentTemplateService) {
+    public AgentInstanceService(
+            AgentInstanceRepository agentInstanceRepository, AgentTemplateService agentTemplateService) {
         this.agentInstanceRepository = agentInstanceRepository;
         this.agentTemplateService = agentTemplateService;
     }
@@ -79,7 +78,8 @@ public class AgentInstanceService {
      * @throws InstanceNotFoundException if no instance matches instanceId
      */
     public AgentInstance getById(Long instanceId) {
-        return agentInstanceRepository.findById(instanceId)
+        return agentInstanceRepository
+                .findById(instanceId)
                 .orElseThrow(() -> new InstanceNotFoundException(instanceId));
     }
 }

@@ -1,5 +1,7 @@
 package com.st00mp.matterhorn.exception;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -11,9 +13,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Central error handling for the API.
@@ -70,11 +69,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException exception, HttpHeaders headers,
-            HttpStatusCode status, WebRequest request) {
+            MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
         Map<String, String> errors = new HashMap<>();
-        exception.getBindingResult()
+        exception
+                .getBindingResult()
                 .getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
@@ -83,8 +82,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException exception, HttpHeaders headers,
-            HttpStatusCode status, WebRequest request) {
+            HttpMessageNotReadableException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
         return jsonError(HttpStatus.BAD_REQUEST, Map.of("error", "Malformed or invalid request body"));
     }
@@ -96,8 +94,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
-            Exception exception, Object body, HttpHeaders headers,
-            HttpStatusCode statusCode, WebRequest request) {
+            Exception exception, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
 
         String message = exception.getMessage() != null ? exception.getMessage() : "Request could not be processed";
         return jsonError(statusCode, Map.of("error", message));

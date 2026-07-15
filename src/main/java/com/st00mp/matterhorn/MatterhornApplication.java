@@ -9,5 +9,4 @@ public class MatterhornApplication {
     public static void main(String[] args) {
         SpringApplication.run(MatterhornApplication.class, args);
     }
-
 }

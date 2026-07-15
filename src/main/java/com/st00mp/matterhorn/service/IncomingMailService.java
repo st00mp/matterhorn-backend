@@ -13,7 +13,8 @@ public class IncomingMailService {
     private final IncomingMailRepository incomingMailRepository;
     private final AgentInstanceService agentInstanceService;
 
-    public IncomingMailService(IncomingMailRepository incomingMailRepository, AgentInstanceService agentInstanceService) {
+    public IncomingMailService(
+            IncomingMailRepository incomingMailRepository, AgentInstanceService agentInstanceService) {
         this.incomingMailRepository = incomingMailRepository;
         this.agentInstanceService = agentInstanceService;
     }
@@ -51,7 +52,8 @@ public class IncomingMailService {
      * @throws IncomingMailNotFoundException if no incoming mail matches incomingMailId
      */
     public IncomingMail getById(Long incomingMailId) {
-        return incomingMailRepository.findById(incomingMailId)
+        return incomingMailRepository
+                .findById(incomingMailId)
                 .orElseThrow(() -> new IncomingMailNotFoundException(incomingMailId));
     }
 }

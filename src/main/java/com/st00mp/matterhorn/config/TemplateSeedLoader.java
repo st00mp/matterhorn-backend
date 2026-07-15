@@ -1,5 +1,7 @@
 package com.st00mp.matterhorn.config;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.st00mp.matterhorn.entity.AgentTemplate;
 import com.st00mp.matterhorn.repository.AgentTemplateRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +11,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Seeds the engagement-letter template on startup from classpath resources.
