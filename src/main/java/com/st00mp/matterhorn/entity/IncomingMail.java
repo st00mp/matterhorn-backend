@@ -1,11 +1,10 @@
 package com.st00mp.matterhorn.entity;
 
 import jakarta.persistence.*;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.Instant;
 
 @Getter
 @Setter

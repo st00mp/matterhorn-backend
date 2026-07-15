@@ -1,12 +1,11 @@
 package com.st00mp.matterhorn.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.st00mp.matterhorn.exception.UnresolvedPlaceholderException;
+import java.util.Map;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class AssemblyServiceTest {
 
@@ -19,7 +18,8 @@ class AssemblyServiceTest {
             var service = new AssemblyService(null, null);
 
             // When
-            var result = service.assemble("You are the assistant for {{company_name}}.", Map.of("company_name", "Fiduciaire Horizon"));
+            var result = service.assemble(
+                    "You are the assistant for {{company_name}}.", Map.of("company_name", "Fiduciaire Horizon"));
 
             // Then
             assertEquals("You are the assistant for Fiduciaire Horizon.", result);
@@ -49,8 +49,7 @@ class AssemblyServiceTest {
             // When
             var result = service.assemble(
                     "You are the assistant for {{company_name}}.",
-                    Map.of("company_name", "Fiduciaire Horizon",
-                            "engine", "sonnet-5"));
+                    Map.of("company_name", "Fiduciaire Horizon", "engine", "sonnet-5"));
 
             // Then
             assertEquals("You are the assistant for Fiduciaire Horizon.", result);
@@ -78,9 +77,7 @@ class AssemblyServiceTest {
             var service = new AssemblyService(null, null);
 
             // When / Then
-            assertThrows(UnresolvedPlaceholderException.class, () ->
-                    service.assemble("Tone is {{tone}}.", Map.of())
-            );
+            assertThrows(UnresolvedPlaceholderException.class, () -> service.assemble("Tone is {{tone}}.", Map.of()));
         }
 
         @Test
@@ -89,9 +86,9 @@ class AssemblyServiceTest {
             var service = new AssemblyService(null, null);
 
             // When / Then
-            assertThrows(UnresolvedPlaceholderException.class, () ->
-                    service.assemble("Tone is {{tone}}.", Map.of("tone", "   "))
-            );
+            assertThrows(
+                    UnresolvedPlaceholderException.class,
+                    () -> service.assemble("Tone is {{tone}}.", Map.of("tone", "   ")));
         }
 
         @Test
@@ -100,8 +97,9 @@ class AssemblyServiceTest {
             var service = new AssemblyService(null, null);
 
             // When
-            var exception = assertThrows(UnresolvedPlaceholderException.class, () ->
-                    service.assemble("Tone is {{tone}} for {{company_name}}.", Map.of()));
+            var exception = assertThrows(
+                    UnresolvedPlaceholderException.class,
+                    () -> service.assemble("Tone is {{tone}} for {{company_name}}.", Map.of()));
 
             // Then
             assertTrue(exception.getMessage().contains("tone"));

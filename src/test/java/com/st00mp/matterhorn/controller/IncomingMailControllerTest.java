@@ -1,9 +1,14 @@
 package com.st00mp.matterhorn.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.st00mp.matterhorn.dto.IncomingMailRequest;
 import com.st00mp.matterhorn.entity.AgentInstance;
 import com.st00mp.matterhorn.repository.AgentInstanceRepository;
 import com.st00mp.matterhorn.service.IncomingMailService;
+import java.util.Map;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.Map;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
 @SpringBootTest
@@ -58,8 +57,7 @@ class IncomingMailControllerTest {
                     "Demande de devis - mission comptable 2026",
                     "Bonjour, nous cherchons un partenaire pour la tenue de notre comptabilité "
                             + "(PME, 12 salariés). Pourriez-vous nous faire parvenir un devis ? "
-                            + "Bien cordialement, Marie Dupont"
-            );
+                            + "Bien cordialement, Marie Dupont");
 
             // When
             mockMvc.perform(post("/admin/incoming-mails")
@@ -83,10 +81,9 @@ class IncomingMailControllerTest {
 
             var request = new IncomingMailRequest(
                     instanceId,
-                    "",   // sender blank
+                    "", // sender blank
                     "Demande de devis - mission comptable 2026",
-                    "Bonjour, pourriez-vous nous faire parvenir un devis ? Merci."
-            );
+                    "Bonjour, pourriez-vous nous faire parvenir un devis ? Merci.");
 
             // When
             mockMvc.perform(post("/admin/incoming-mails")
@@ -107,8 +104,8 @@ class IncomingMailControllerTest {
                     instanceId,
                     "marie.dupont@horizon-consulting.be",
                     "Demande de devis - mission comptable 2026",
-                    ""   // body blank
-            );
+                    "" // body blank
+                    );
 
             // When
             mockMvc.perform(post("/admin/incoming-mails")
@@ -124,11 +121,10 @@ class IncomingMailControllerTest {
         void createIncomingMail_unknownInstance_returns404() throws Exception {
             // Given
             var request = new IncomingMailRequest(
-                    999999L,   // no instance with this id
+                    999999L, // no instance with this id
                     "marie.dupont@horizon-consulting.be",
                     "Demande de devis - mission comptable 2026",
-                    "Bonjour, pourriez-vous nous faire parvenir un devis ? Merci."
-            );
+                    "Bonjour, pourriez-vous nous faire parvenir un devis ? Merci.");
 
             // When
             mockMvc.perform(post("/admin/incoming-mails")
@@ -149,12 +145,13 @@ class IncomingMailControllerTest {
             // Given
             var instanceId = seedInstance();
 
-            var mailId = incomingMailService.create(new IncomingMailRequest(
-                    instanceId,
-                    "jean.martin@atelier-lumen.fr",
-                    "Question sur vos délais de traitement",
-                    "Bonjour, quel est votre délai moyen pour la clôture d'un exercice ? Merci d'avance."
-            )).getId();
+            var mailId = incomingMailService
+                    .create(new IncomingMailRequest(
+                            instanceId,
+                            "jean.martin@atelier-lumen.fr",
+                            "Question sur vos délais de traitement",
+                            "Bonjour, quel est votre délai moyen pour la clôture d'un exercice ? Merci d'avance."))
+                    .getId();
 
             // When
             mockMvc.perform(get("/admin/incoming-mails/{id}", mailId))
@@ -166,7 +163,10 @@ class IncomingMailControllerTest {
                     .andExpect(jsonPath("$.instanceId").value(instanceId))
                     .andExpect(jsonPath("$.sender").value("jean.martin@atelier-lumen.fr"))
                     .andExpect(jsonPath("$.subject").value("Question sur vos délais de traitement"))
-                    .andExpect(jsonPath("$.body").value("Bonjour, quel est votre délai moyen pour la clôture d'un exercice ? Merci d'avance."));
+                    .andExpect(
+                            jsonPath("$.body")
+                                    .value(
+                                            "Bonjour, quel est votre délai moyen pour la clôture d'un exercice ? Merci d'avance."));
         }
 
         @Test

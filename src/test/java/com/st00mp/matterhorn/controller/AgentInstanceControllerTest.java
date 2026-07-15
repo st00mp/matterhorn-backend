@@ -1,12 +1,18 @@
 package com.st00mp.matterhorn.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.st00mp.matterhorn.dto.InstanceRequest;
 import com.st00mp.matterhorn.dto.TemplateRequest;
-import com.st00mp.matterhorn.entity.FieldDefinition;
 import com.st00mp.matterhorn.entity.AgentInstance;
+import com.st00mp.matterhorn.entity.FieldDefinition;
 import com.st00mp.matterhorn.repository.AgentInstanceRepository;
 import com.st00mp.matterhorn.service.AgentInstanceService;
 import com.st00mp.matterhorn.service.AgentTemplateService;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
 @SpringBootTest
@@ -55,13 +54,12 @@ class AgentInstanceControllerTest {
                     "Sales",
                     "Generates a personalised quote based on the company name and hourly rate.",
                     "You are a quote assistant for {{company_name}}.",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
-                    "1.0.0"
-            );
+                    List.of(new FieldDefinition(
+                            "company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
+                    "1.0.0");
             var templateId = agentTemplateService.create(templateRequest).getId();
 
-            var instanceRequest = new InstanceRequest(
-                    Map.of("company_name", "Fiduciaire Horizon"));
+            var instanceRequest = new InstanceRequest(Map.of("company_name", "Fiduciaire Horizon"));
 
             // When
             mockMvc.perform(post("/templates/{templateId}/instances", templateId)
@@ -80,14 +78,16 @@ class AgentInstanceControllerTest {
         void createInstance_blankValue_returns400() throws Exception {
             // Given
             var templateRequest = new TemplateRequest(
-                    "Quote Agent", "Sales", "desc",
+                    "Quote Agent",
+                    "Sales",
+                    "desc",
                     "Instructions {{company_name}}",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
-                    "1.0.0"
-            );
+                    List.of(new FieldDefinition(
+                            "company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
+                    "1.0.0");
             var templateId = agentTemplateService.create(templateRequest).getId();
 
-            var request = new InstanceRequest(Map.of("company_name", "   "));   // blank value
+            var request = new InstanceRequest(Map.of("company_name", "   ")); // blank value
 
             // When
             mockMvc.perform(post("/templates/{templateId}/instances", templateId)
@@ -102,14 +102,16 @@ class AgentInstanceControllerTest {
         void createInstance_incompleteValues_returns400() throws Exception {
             // Given
             var templateRequest = new TemplateRequest(
-                    "Quote Agent", "Sales", "desc",
+                    "Quote Agent",
+                    "Sales",
+                    "desc",
                     "Instructions {{company_name}}",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
-                    "1.0.0"
-            );
+                    List.of(new FieldDefinition(
+                            "company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
+                    "1.0.0");
             var templateId = agentTemplateService.create(templateRequest).getId();
 
-            var request = new InstanceRequest(Map.of());   // company_name missing
+            var request = new InstanceRequest(Map.of()); // company_name missing
 
             // When
             mockMvc.perform(post("/templates/{templateId}/instances", templateId)
@@ -156,16 +158,20 @@ class AgentInstanceControllerTest {
         @Test
         void getInstanceOutput_nominal_returns200() throws Exception {
             // Given
-            var templateId = agentTemplateService.create(new TemplateRequest(
-                    "Quote Agent",
-                    "Sales",
-                    "desc",
-                    "You are the assistant for {{company_name}}.",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
-                    "1.0.0")).getId();
+            var templateId = agentTemplateService
+                    .create(new TemplateRequest(
+                            "Quote Agent",
+                            "Sales",
+                            "desc",
+                            "You are the assistant for {{company_name}}.",
+                            List.of(new FieldDefinition(
+                                    "company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
+                            "1.0.0"))
+                    .getId();
 
-            var instanceId = agentInstanceService.create(templateId,
-                    new InstanceRequest(Map.of("company_name", "Fiduciaire Horizon"))).getId();
+            var instanceId = agentInstanceService
+                    .create(templateId, new InstanceRequest(Map.of("company_name", "Fiduciaire Horizon")))
+                    .getId();
 
             // When
             mockMvc.perform(get("/instances/{id}/output", instanceId))
@@ -185,14 +191,24 @@ class AgentInstanceControllerTest {
         @Test
         void getInstanceOutput_unresolvedPlaceholder_returns422() throws Exception {
             // Given
-            var templateId = agentTemplateService.create(new TemplateRequest(
-                    "Quote Agent", "Sales", "desc",
-                    "Hi {{company_name}}, signed {{signature}}.",   // 2 placeholders
-                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),                  // fields : signature ABSENT
-                    "1.0.0")).getId();
+            var templateId = agentTemplateService
+                    .create(new TemplateRequest(
+                            "Quote Agent",
+                            "Sales",
+                            "desc",
+                            "Hi {{company_name}}, signed {{signature}}.", // 2 placeholders
+                            List.of(new FieldDefinition(
+                                    "company_name",
+                                    "Company name",
+                                    "text",
+                                    FieldDefinition.Kind.PROMPT,
+                                    "")), // fields : signature ABSENT
+                            "1.0.0"))
+                    .getId();
 
-            var instanceId = agentInstanceService.create(templateId,
-                    new InstanceRequest(Map.of("company_name", "Fiduciaire Horizon"))).getId();
+            var instanceId = agentInstanceService
+                    .create(templateId, new InstanceRequest(Map.of("company_name", "Fiduciaire Horizon")))
+                    .getId();
 
             // When
             mockMvc.perform(get("/instances/{id}/output", instanceId))
@@ -206,8 +222,7 @@ class AgentInstanceControllerTest {
             // Regression: the output endpoint is produces=text/plain, but errors are JSON.
             // A client sending Accept: text/plain must still get the 404 (not a bare 500
             // from a content-negotiation collision).
-            mockMvc.perform(get("/instances/{id}/output", 999999L)
-                            .accept(MediaType.TEXT_PLAIN))
+            mockMvc.perform(get("/instances/{id}/output", 999999L).accept(MediaType.TEXT_PLAIN))
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.error").exists());
@@ -216,17 +231,22 @@ class AgentInstanceControllerTest {
         @Test
         void getInstanceOutput_unresolvedPlaceholder_acceptTextPlain_returns422AsJson() throws Exception {
             // Regression: same collision as above, on the 422 branch.
-            var templateId = agentTemplateService.create(new TemplateRequest(
-                    "Quote Agent", "Sales", "desc",
-                    "Hi {{company_name}}, signed {{signature}}.",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
-                    "1.0.0")).getId();
+            var templateId = agentTemplateService
+                    .create(new TemplateRequest(
+                            "Quote Agent",
+                            "Sales",
+                            "desc",
+                            "Hi {{company_name}}, signed {{signature}}.",
+                            List.of(new FieldDefinition(
+                                    "company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
+                            "1.0.0"))
+                    .getId();
 
-            var instanceId = agentInstanceService.create(templateId,
-                    new InstanceRequest(Map.of("company_name", "Fiduciaire Horizon"))).getId();
+            var instanceId = agentInstanceService
+                    .create(templateId, new InstanceRequest(Map.of("company_name", "Fiduciaire Horizon")))
+                    .getId();
 
-            mockMvc.perform(get("/instances/{id}/output", instanceId)
-                            .accept(MediaType.TEXT_PLAIN))
+            mockMvc.perform(get("/instances/{id}/output", instanceId).accept(MediaType.TEXT_PLAIN))
                     .andExpect(status().isUnprocessableEntity())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.error").exists());
@@ -254,16 +274,20 @@ class AgentInstanceControllerTest {
         @Test
         void getInstanceById_nominal_returns200() throws Exception {
             // Given
-            var templateId = agentTemplateService.create(new TemplateRequest(
-                    "Quote Agent",
-                    "Sales",
-                    "desc",
-                    "You are the assistant for {{company_name}}.",
-                    List.of(new FieldDefinition("company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
-                    "1.0.0")).getId();
+            var templateId = agentTemplateService
+                    .create(new TemplateRequest(
+                            "Quote Agent",
+                            "Sales",
+                            "desc",
+                            "You are the assistant for {{company_name}}.",
+                            List.of(new FieldDefinition(
+                                    "company_name", "Company name", "text", FieldDefinition.Kind.PROMPT, "")),
+                            "1.0.0"))
+                    .getId();
 
-            var instanceId = agentInstanceService.create(templateId,
-                    new InstanceRequest(Map.of("company_name", "Fiduciaire Horizon"))).getId();
+            var instanceId = agentInstanceService
+                    .create(templateId, new InstanceRequest(Map.of("company_name", "Fiduciaire Horizon")))
+                    .getId();
 
             // When
             mockMvc.perform(get("/instances/{id}", instanceId))
