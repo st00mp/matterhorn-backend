@@ -2,21 +2,27 @@ package com.st00mp.matterhorn.service;
 
 import com.st00mp.matterhorn.dto.IncomingMailRequest;
 import com.st00mp.matterhorn.entity.IncomingMail;
+import com.st00mp.matterhorn.entity.QuoteRequest;
 import com.st00mp.matterhorn.exception.IncomingMailNotFoundException;
 import com.st00mp.matterhorn.exception.InstanceNotFoundException;
 import com.st00mp.matterhorn.repository.IncomingMailRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class IncomingMailService {
 
     private final IncomingMailRepository incomingMailRepository;
     private final AgentInstanceService agentInstanceService;
+    private final ClassificationService classificationService;
 
     public IncomingMailService(
-            IncomingMailRepository incomingMailRepository, AgentInstanceService agentInstanceService) {
+            IncomingMailRepository incomingMailRepository,
+            AgentInstanceService agentInstanceService,
+            ClassificationService classificationService) {
         this.incomingMailRepository = incomingMailRepository;
         this.agentInstanceService = agentInstanceService;
+        this.classificationService = classificationService;
     }
 
     /**
@@ -24,12 +30,14 @@ public class IncomingMailService {
      * <p>
      * The referenced instance is loaded first to guarantee it exists; the mail body
      * is stored verbatim ("as received") and {@code receivedAt} is set by the server
-     * at persistence time.
+     * at persistence time. Once saved, the mail is passed to the classification
+     * service, which creates a linked {@link QuoteRequest}.
      *
      * @param request the request holding the instance reference and the mail content
      * @return the newly created and persisted {@link IncomingMail}
      * @throws InstanceNotFoundException if no instance matches the given instanceId
      */
+    @Transactional
     public IncomingMail create(IncomingMailRequest request) {
 
         agentInstanceService.getById(request.instanceId());
@@ -41,7 +49,11 @@ public class IncomingMailService {
         mail.setSubject(request.subject());
         mail.setBody(request.body());
 
-        return incomingMailRepository.save(mail);
+        IncomingMail savedMail = incomingMailRepository.save(mail);
+
+        classificationService.classify(savedMail);
+
+        return savedMail;
     }
 
     /**

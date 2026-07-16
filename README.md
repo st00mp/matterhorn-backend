@@ -126,7 +126,8 @@ The API is documented and browsable via Swagger UI once the app is running:
 - `POST /admin/incoming-mails` — capture an incoming mail attached to an existing
   instance, stored exactly as received with a server-set `receivedAt` (201 with
   `Location` header, 400 if `sender` or `body` is missing or blank, 404 if the
-  instance does not exist)
+  instance does not exist). Each captured mail is also classified — for now a stub
+  that always creates a `QuoteRequest` with status `TO_VALIDATE`, linked to the mail
 - `GET /admin/incoming-mails/{id}` — get an incoming mail by ID, exactly as stored
   (404 if not found)
 
