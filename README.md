@@ -11,6 +11,7 @@ REST API built with Spring Boot. First backend service of the Matterhorn project
 - Java 21
 - Spring Boot 4.1
 - Spring Data JPA · H2 in-memory (dev/test) · PostgreSQL (Docker)
+- Anthropic Messages API via Spring `RestClient` (plain HTTP, no SDK)
 - Maven · Docker
 
 ## Run locally
@@ -20,6 +21,13 @@ REST API built with Spring Boot. First backend service of the Matterhorn project
 ```
 
 The application starts on `http://localhost:8080`.
+
+To enable LLM extraction on incoming mails, export your Anthropic API key first
+(see [Configuration](#configuration)):
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+```
 
 Check it's running:
 
@@ -37,7 +45,18 @@ docker compose up --build
 ```
 
 Builds the image (multi-stage) and starts the app with a PostgreSQL database
-on `http://localhost:8080`.
+on `http://localhost:8080`. `ANTHROPIC_API_KEY` is forwarded from your shell
+into the container if set.
+
+## Configuration
+
+LLM extraction is configured through environment variables — the API key is
+never stored in the repository:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Anthropic API key used by the extractor | _(empty — extraction fails and is logged, capture still works)_ |
+| `ANTHROPIC_MODEL` | Anthropic model used for extraction | `claude-sonnet-5` |
 
 ## Quickstart
 
@@ -126,8 +145,19 @@ The API is documented and browsable via Swagger UI once the app is running:
 - `POST /admin/incoming-mails` — capture an incoming mail attached to an existing
   instance, stored exactly as received with a server-set `receivedAt` (201 with
   `Location` header, 400 if `sender` or `body` is missing or blank, 404 if the
-  instance does not exist). Each captured mail is also classified — for now a stub
-  that always creates a `QuoteRequest` with status `TO_VALIDATE`, linked to the mail
+  instance does not exist). Each captured mail then goes through a synchronous
+  chain:
+  1. **Classification** — for now a stub that always creates a `QuoteRequest`
+     with status `TO_VALIDATE`, linked to the mail.
+  2. **Extraction** — the mail body is sent to the LLM with the versioned
+     extractor prompt (`src/main/resources/prompt/extractor.md`), which targets
+     three prospect variables: `client_legal_form`, `client_document_volume`,
+     `client_vat_regime`. Each returned `{key, value, quote}` is persisted as an
+     `ExtractedVariable` linked to the `QuoteRequest`, with a provenance decided
+     by deterministic verification, never by the LLM: `SOURCED` if the quote
+     exists verbatim in the mail body, `ASSUMED` if the value has no verifiable
+     quote, `MISSING` if there is no value. Extraction failures are logged and
+     never block the capture.
 - `GET /admin/incoming-mails/{id}` — get an incoming mail by ID, exactly as stored
   (404 if not found)
 
@@ -136,3 +166,7 @@ The API is documented and browsable via Swagger UI once the app is running:
 ```bash
 ./mvnw verify
 ```
+
+The suite runs fully offline: tests substitute the real Anthropic client with a
+programmable fake (`FakeLlmClient`, shared via `FakeLlmTestConfig`), so no
+network access or API key is required.
