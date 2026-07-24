@@ -6,14 +6,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.st00mp.matterhorn.dto.IncomingMailRequest;
 import com.st00mp.matterhorn.entity.AgentInstance;
+import com.st00mp.matterhorn.llm.FakeLlmClient;
+import com.st00mp.matterhorn.llm.FakeLlmTestConfig;
 import com.st00mp.matterhorn.repository.AgentInstanceRepository;
 import com.st00mp.matterhorn.service.IncomingMailService;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +26,14 @@ import tools.jackson.databind.ObjectMapper;
 @Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(FakeLlmTestConfig.class)
 class IncomingMailControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private FakeLlmClient fake;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -35,6 +43,12 @@ class IncomingMailControllerTest {
 
     @Autowired
     private IncomingMailService incomingMailService;
+
+    /** No-op extraction by default: without a programmed response the fake returns null and pollutes the logs. */
+    @BeforeEach
+    void stubLlm() {
+        fake.willReturn("[]");
+    }
 
     private Long seedInstance() {
         var instance = new AgentInstance();

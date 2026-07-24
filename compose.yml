@@ -5,6 +5,8 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      # Forwarded from the host shell; extraction is skipped (logged error) if unset
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     depends_on:
       postgres:
         # Wait until the DB is ready to accept connections, not just started
