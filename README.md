@@ -73,7 +73,7 @@ all of them, including `engine` fields (instance validation covers every field).
 # 1. The seeded template is already there
 curl http://localhost:8080/templates
 
-# 2. Create a test instance from it (all 8 fields, engine fields included)
+# 2. Create a test instance from it (all 11 fields, engine fields included)
 curl -i -X POST http://localhost:8080/templates/1/instances \
   -H 'Content-Type: application/json' \
   -d '{
@@ -82,8 +82,11 @@ curl -i -X POST http://localhost:8080/templates/1/instances \
           "firm_company_number": "BE 0123.456.789",
           "firm_itaa_number": "ITAA 50.123.456",
           "representative_name": "Marie Lambert, gérante",
-          "base_monthly_fee": "95",
-          "price_per_document": "0.85",
+          "base_fee_company": "220.00",
+          "base_fee_individual": "135.00",
+          "price_per_document": "1.20",
+          "included_documents": "15",
+          "monthly_vat_surcharge": "36.00",
           "tone_of_voice": "professionnel et chaleureux",
           "signature": "Marie Lambert — Fiduciaire Horizon"
         }
@@ -151,13 +154,23 @@ The API is documented and browsable via Swagger UI once the app is running:
      with status `TO_VALIDATE`, linked to the mail.
   2. **Extraction** — the mail body is sent to the LLM with the versioned
      extractor prompt (`src/main/resources/prompt/extractor.md`), which targets
-     three prospect variables: `client_legal_form`, `client_document_volume`,
-     `client_vat_regime`. Each returned `{key, value, quote}` is persisted as an
-     `ExtractedVariable` linked to the `QuoteRequest`, with a provenance decided
-     by deterministic verification, never by the LLM: `SOURCED` if the quote
-     exists verbatim in the mail body, `ASSUMED` if the value has no verifiable
-     quote, `MISSING` if there is no value. Extraction failures are logged and
-     never block the capture.
+     three prospect variables: `client_legal_form` and `client_vat_regime`,
+     constrained to the tokens `COMPANY`/`INDIVIDUAL` and `MONTHLY`/`QUARTERLY`,
+     and `client_document_volume`, kept as the mail's own wording. Each returned
+     `{key, value, quote}` is persisted as an `ExtractedVariable` linked to the
+     `QuoteRequest`, with a provenance decided by deterministic verification,
+     never by the LLM: `SOURCED` if the quote exists verbatim in the mail body,
+     `ASSUMED` if the value has no verifiable quote, `MISSING` if there is no
+     value. Extraction failures are logged and never block the capture.
+  3. **Pricing** — no LLM at this stage. The extracted variables are normalized
+     into typed values, then priced against the instance's `engine` fields (the
+     accountant's grid) into `QuoteLine`s: base fee, per-document overflow beyond
+     the included volume, and VAT filing line. Every line carries its own
+     provenance — `GRID` for a grid-only amount, `DETECTED` when computed from a
+     variable quoted in the mail, `ASSUMED` otherwise — and its citation. A single
+     unusable variable produces no line at all: no amount is computed rather than
+     guessed, and a human follows up. Pricing failures are logged and never block
+     the capture.
 - `GET /admin/incoming-mails/{id}` — get an incoming mail by ID, exactly as stored
   (404 if not found)
 
