@@ -1,11 +1,15 @@
 package com.st00mp.matterhorn.config;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.st00mp.matterhorn.entity.AgentTemplate;
+import com.st00mp.matterhorn.entity.FieldDefinition;
 import com.st00mp.matterhorn.repository.AgentTemplateRepository;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,5 +59,30 @@ class TemplateSeedLoaderTest {
 
         // Then
         assertEquals(expected, seeded.getInstructions());
+    }
+
+    @Test
+    void applicationStart_seededTemplate_carriesExpectedFieldKeys() {
+
+        // Given
+        AgentTemplate seeded = repository.findAll().getFirst();
+
+        // When
+        List<String> keys =
+                seeded.getFields().stream().map(FieldDefinition::key).collect(Collectors.toList());
+        // Then
+        assertThat(keys)
+                .containsExactly(
+                        "firm_name",
+                        "firm_company_number",
+                        "firm_itaa_number",
+                        "representative_name",
+                        "base_fee_company",
+                        "base_fee_individual",
+                        "price_per_document",
+                        "included_documents",
+                        "monthly_vat_surcharge",
+                        "tone_of_voice",
+                        "signature");
     }
 }

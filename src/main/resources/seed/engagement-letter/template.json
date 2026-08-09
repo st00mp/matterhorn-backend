@@ -33,11 +33,18 @@
       "help": "Personne qui signe la lettre au nom du cabinet. Ex. : Marie Lambert, gérante"
     },
     {
-      "key": "base_monthly_fee",
-      "label": "Forfait mensuel de base (€)",
+      "key": "base_fee_company",
+      "label": "Montant du forfait mensuel pour les entreprises (€)",
       "type": "number",
       "kind": "engine",
-      "help": "Montant du forfait mensuel. Lu par le moteur de chiffrage, jamais inséré dans le prompt."
+      "help": "Montant du forfait mensuel pour les entreprises. Lu par le moteur de chiffrage, jamais inséré dans le prompt."
+    },
+    {
+      "key": "base_fee_individual",
+      "label": "Montant du forfait mensuel pour les indépendants (€)",
+      "type": "number",
+      "kind": "engine",
+      "help": "Montant du forfait mensuel pour les indépendants. Lu par le moteur de chiffrage, jamais inséré dans le prompt."
     },
     {
       "key": "price_per_document",
@@ -45,6 +52,20 @@
       "type": "number",
       "kind": "engine",
       "help": "Prix unitaire au-delà du volume inclus. Lu par le moteur de chiffrage, jamais inséré dans le prompt."
+    },
+    {
+      "key": "included_documents",
+      "label": "Volume de documents inclus",
+      "type": "number",
+      "kind": "engine",
+      "help": "Nombre de documents inclus dans le forfait mensuel. Lu par le moteur de chiffrage, jamais inséré dans le prompt."
+    },
+    {
+      "key": "monthly_vat_surcharge",
+      "label": "Majoration TVA mensuelle (€)",
+      "type": "number",
+      "kind": "engine",
+      "help": "Montant de la majoration TVA mensuelle. Lu par le moteur de chiffrage, jamais inséré dans le prompt."
     },
     {
       "key": "tone_of_voice",

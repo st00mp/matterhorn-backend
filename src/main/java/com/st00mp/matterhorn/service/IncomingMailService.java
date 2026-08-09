@@ -18,16 +18,19 @@ public class IncomingMailService {
     private final AgentInstanceService agentInstanceService;
     private final ClassificationService classificationService;
     private final ExtractionService extractionService;
+    private final PricingService pricingService;
 
     public IncomingMailService(
             IncomingMailRepository incomingMailRepository,
             AgentInstanceService agentInstanceService,
             ClassificationService classificationService,
-            ExtractionService extractionService) {
+            ExtractionService extractionService,
+            PricingService pricingService) {
         this.incomingMailRepository = incomingMailRepository;
         this.agentInstanceService = agentInstanceService;
         this.classificationService = classificationService;
         this.extractionService = extractionService;
+        this.pricingService = pricingService;
     }
 
     /**
@@ -35,12 +38,14 @@ public class IncomingMailService {
      * <p>
      * The referenced instance is loaded first to guarantee it exists; the mail body
      * is stored verbatim ("as received") and {@code receivedAt} is set by the server
-     * at persistence time. Once saved, the mail is passed to the classification
-     * service, which creates a linked {@link QuoteRequest}, then to the extraction
-     * service, which persists the prospect variables found in the mail body.
+     * at persistence time. Once saved, the mail runs through the chain: classification
+     * creates a linked {@link QuoteRequest}, extraction persists the prospect variables
+     * found in the mail body, then pricing turns those variables into quote lines.
      * <p>
-     * Extraction failures (LLM unreachable, unparseable answer) are logged but never
-     * block the capture: the mail and its {@link QuoteRequest} are persisted anyway.
+     * Extraction and pricing failures (LLM unreachable, unparseable answer, unusable
+     * grid) are logged but never block the capture: the mail and its
+     * {@link QuoteRequest} are persisted anyway. A mail can therefore end up with no
+     * variables, or with variables but no quote lines — a human takes over from there.
      *
      * @param request the request holding the instance reference and the mail content
      * @return the newly created and persisted {@link IncomingMail}
@@ -66,6 +71,12 @@ public class IncomingMailService {
             extractionService.extract(quoteRequest, savedMail);
         } catch (RuntimeException e) {
             log.error("Extraction failed for mail {}", savedMail.getId(), e);
+        }
+
+        try {
+            pricingService.price(quoteRequest, savedMail);
+        } catch (RuntimeException e) {
+            log.error("Pricing failed for mail {}", savedMail.getId(), e);
         }
 
         return savedMail;
