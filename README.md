@@ -1,10 +1,20 @@
 # Matterhorn — Backend
 
-Registry of agent templates: an author defines instruction templates with
-placeholders, a client customizes them through a wizard, and the service
-assembles the final spec by substituting the values.
+Automated quote generation for accounting firms, from incoming emails.
 
-REST API built with Spring Boot. First backend service of the Matterhorn project.
+A prospect writes to the firm. The service captures the mail, extracts the
+variables that drive the price (legal form, VAT regime, document volume) with an
+LLM, then prices the request **deterministically** against the firm's own grid.
+Every extracted value and every quote line carries its provenance: quoted
+verbatim from the mail, assumed, or missing. The LLM extracts; it never decides
+an amount. When a variable cannot be trusted, no amount is produced and a human
+follows up.
+
+Under the hood, a registry of agent templates: an author defines instruction
+templates with placeholders, a firm instantiates one with its own values, and
+the service assembles the final spec.
+
+REST API built with Spring Boot 4 (Java 21). Personal backend exploration project.
 
 ## Stack
 
