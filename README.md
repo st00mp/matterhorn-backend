@@ -13,7 +13,7 @@ The price is then computed **deterministically** from the firm's own grid.
 
 | | |
 |---|---|
-| ✅ **Working & tested** | Template registry · mail capture · LLM extraction with provenance · deterministic pricing |
+| ✅ **Working & tested** | Template registry · mail capture · LLM extraction with provenance (tested offline; can fail live, see known issue below) · deterministic pricing |
 | 🚧 **Next steps** | Expose the computed quote through the API · real classification · real mailbox intake · reply to the prospect |
 | ⚠️ **Known issue** | Live extraction can fail with a `NullPointerException` when the model's first response block is not text ([#8](http://100.68.134.6:8929/st00mp/matterhorn-backend/-/issues/8)). |
 
