@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Global OpenAPI information displayed at the top of Swagger UI.
- * Endpoint-level documentation lives on the controllers; common error
+ * Endpoint-level documentation lives on the controller.api interfaces; common error
  * behavior (400/404) is handled by the GlobalExceptionHandler.
  */
 @Configuration
