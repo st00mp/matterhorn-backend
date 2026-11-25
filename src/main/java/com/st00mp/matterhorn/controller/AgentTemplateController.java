@@ -1,16 +1,9 @@
 package com.st00mp.matterhorn.controller;
 
+import com.st00mp.matterhorn.controller.api.AgentTemplateApi;
 import com.st00mp.matterhorn.dto.TemplateRequest;
 import com.st00mp.matterhorn.entity.AgentTemplate;
 import com.st00mp.matterhorn.service.AgentTemplateService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -18,9 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@Tag(name = "Agent Templates", description = "Create, read, update and delete reusable agent templates")
 @RestController
-public class AgentTemplateController {
+public class AgentTemplateController implements AgentTemplateApi {
 
     private final AgentTemplateService agentTemplateService;
 
@@ -28,15 +20,7 @@ public class AgentTemplateController {
         this.agentTemplateService = agentTemplateService;
     }
 
-    @Operation(
-            summary = "Create an agent template",
-            description =
-                    "Creates a new agent template and returns the created resource with its URL in the Location header.")
-    @ApiResponse(
-            responseCode = "201",
-            description = "Template successfully created",
-            headers = @Header(name = "Location", description = "URL of the created resource, e.g. /templates/42"),
-            content = @Content(schema = @Schema(implementation = AgentTemplate.class)))
+    @Override
     @PostMapping("/templates")
     public ResponseEntity<AgentTemplate> createTemplate(@Valid @RequestBody TemplateRequest request) {
 
@@ -50,51 +34,31 @@ public class AgentTemplateController {
         return ResponseEntity.created(location).body(saved);
     }
 
-    @Operation(summary = "Get an agent template", description = "Returns an agent template by its ID.")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Template successfully retrieved",
-            content = @Content(schema = @Schema(implementation = AgentTemplate.class)))
+    @Override
     @GetMapping("/templates/{id}")
-    public ResponseEntity<AgentTemplate> getTemplateById(
-            @Parameter(description = "ID of the template", example = "42") @PathVariable Long id) {
+    public ResponseEntity<AgentTemplate> getTemplateById(@PathVariable Long id) {
         AgentTemplate template = agentTemplateService.getById(id);
         return ResponseEntity.ok(template);
     }
 
-    @Operation(
-            summary = "List all agent templates",
-            description = "Returns all agent templates. Returns an empty array if no template exists.")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Templates successfully retrieved",
-            content = @Content(array = @ArraySchema(schema = @Schema(implementation = AgentTemplate.class))))
+    @Override
     @GetMapping("/templates")
     public ResponseEntity<List<AgentTemplate>> getAllTemplates() {
         List<AgentTemplate> templates = agentTemplateService.getAll();
         return ResponseEntity.ok(templates);
     }
 
-    @Operation(
-            summary = "Update an agent template",
-            description = "Updates an existing agent template by its ID and returns the updated resource.")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Template successfully updated",
-            content = @Content(schema = @Schema(implementation = AgentTemplate.class)))
+    @Override
     @PutMapping("/templates/{id}")
     public ResponseEntity<AgentTemplate> updateTemplate(
-            @Parameter(description = "ID of the template", example = "42") @PathVariable Long id,
-            @Valid @RequestBody TemplateRequest request) {
+            @PathVariable Long id, @Valid @RequestBody TemplateRequest request) {
         AgentTemplate updated = agentTemplateService.update(id, request);
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Delete an agent template", description = "Deletes an agent template by its ID.")
-    @ApiResponse(responseCode = "204", description = "Template successfully deleted")
+    @Override
     @DeleteMapping("/templates/{id}")
-    public ResponseEntity<Void> deleteTemplate(
-            @Parameter(description = "ID of the template", example = "42") @PathVariable Long id) {
+    public ResponseEntity<Void> deleteTemplate(@PathVariable Long id) {
         agentTemplateService.delete(id);
         return ResponseEntity.noContent().build();
     }
